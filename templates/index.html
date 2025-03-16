@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paléo-TTS</title>
+  </head>
+  <body>
+    <h1>Convertisseur Texte en Audio - Paléo-TTS</h1>
+
+    <form id="tts-form">
+      <label for="text">Entrez votre texte :</label><br />
+      <textarea id="text" name="text" rows="4" cols="50"></textarea><br /><br />
+
+      <!-- Sélecteur de voix -->
+      <label for="voice">Choisissez la voix :</label>
+      <select id="voice" name="voice">
+        <option value="fr">Féminine</option></select
+      ><br /><br />
+
+      <!-- Sélecteur de vitesse -->
+      <label for="speed">Vitesse :</label>
+      <select id="speed" name="speed">
+        <option value="1">Normale</option>
+        <option value="0.8">Rapide</option></select
+      ><br /><br />
+
+      <button type="submit">Générer Audio</button>
+    </form>
+
+    <div id="audio-container" style="display: none; margin-top: 20px">
+      <h3>Audio généré :</h3>
+      <audio id="audio-player" controls></audio><br />
+      <a id="download-link" href="#" download>
+        <button>Télécharger</button>
+      </a>
+    </div>
+
+    <script>
+      document
+        .getElementById("tts-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const text = document.getElementById("text").value;
+          const voice = document.getElementById("voice").value;
+          const speed = document.getElementById("speed").value;
+
+          fetch("/", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ text, voice, speed }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.audio_url) {
+                document.getElementById("audio-container").style.display =
+                  "block";
+                document.getElementById("audio-player").src = data.audio_url;
+                document.getElementById("download-link").href =
+                  data.download_url;
+                document.getElementById("download-link").style.display =
+                  "inline-block";
+              } else {
+                alert(
+                  "Erreur : " + (data.error || "Impossible de générer l'audio")
+                );
+              }
+            })
+            .catch((error) => console.error("Erreur :", error));
+        });
+    </script>
+  </body>
+</html>
