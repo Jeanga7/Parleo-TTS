@@ -11,6 +11,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/history': {
+        target: 'http://127.0.0.1:5000/history', // Adresse de votre backend Flask
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   optimizeDeps: {

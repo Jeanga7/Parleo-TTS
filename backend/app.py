@@ -1,3 +1,4 @@
+import datetime
 from flask import Flask, request, jsonify, send_file, send_from_directory
 from gtts import gTTS
 import os
@@ -10,6 +11,17 @@ CORS(app)
 
 AUDIO_FOLDER = "static/audio"
 os.makedirs(AUDIO_FOLDER, exist_ok=True)
+
+# Historique des fichiers audio générés
+history = []
+
+SUPPORTED_LANGUAGES = {
+    "fr": "Français",
+    "en": "English",
+    "es": "Español",
+    "de": "Deutsch",
+    "it": "Italiano"
+}
 
 def cleanup_old_files():
     """Supprime les fichiers audio de plus de 10 minutes."""
@@ -39,11 +51,18 @@ def index():
 
             tts = gTTS(text=text, lang=voice, slow=(speed < 1))
             tts.save(filepath)
-
-            return jsonify({
+            
+            # Enregistrer dans l'historique avec la date de génération
+            generated_time = datetime.datetime.now().isoformat()
+            history_item = {
+                "text": text,
                 "audio_url": f"http://127.0.0.1:5000/audio/{filename}",  # URL pour l'écoute en ligne
-                "download_url": f"http://127.0.0.1:5000/download/{filename}"  # URL pour le téléchargement
-            })
+                "download_url": f"http://127.0.0.1:5000/download/{filename}",  # URL pour le téléchargement
+                "time": generated_time
+            }
+            history.append(history_item)
+
+            return jsonify(history_item)
 
         except Exception as e:
             # Log de l'erreur
@@ -66,6 +85,31 @@ def serve_audio(filename):
         return send_file(filepath, mimetype="audio/mpeg")
     return "Fichier introuvable", 404
 
+@app.route("/history", methods=["GET"])
+def get_history():
+    """Renvoie l'historique paginé des audios générés."""
+    try:
+        page = int(request.args.get("page", 1))
+        limit = int(request.args.get("limit", 5))  # Par défaut, 5 éléments par page
+        
+        if page < 1 or limit < 1:
+            return jsonify({"error": "Les valeurs de page et limit doivent être supérieures à 0."}), 400
+        
+        sorted_history = list(reversed(history))
+
+        start = (page - 1) * limit
+        end = start + limit
+
+        paginated_history = sorted_history[start:end]
+        return jsonify({
+            "history": paginated_history,
+            "total": len(history),
+            "page": page,
+            "limit": limit,
+            "total_pages": (len(history) + limit - 1) // limit
+        })
+    except Exception as e:
+        return jsonify({"error": f"Erreur lors de la récupération de l'historique: {str(e)}"}), 500
 
 @app.route("/<path:path>")
 def static_files(path):
