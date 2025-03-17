@@ -6,7 +6,7 @@ import uuid
 import time
 from flask_cors import CORS
 
-app = Flask(__name__, static_folder="frontend/dist", static_url_path="/static")
+app = Flask(__name__, static_folder="../frontend/dist", static_url_path="/static")
 CORS(app)
 
 AUDIO_FOLDER = "static/audio"

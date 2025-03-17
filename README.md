@@ -48,6 +48,7 @@ python app.py  # Lancer le serveur Flask
 ```bash
 cd frontend
 npm install  # Installer les dépendances
+npm run build
 npm run dev  # Lancer l'application
 ```
 
