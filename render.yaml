@@ -15,7 +15,7 @@ services:
     pythonVersion: "3.9"
 
   - name: paleo-tts-frontend
-    type: static
+    type: web
     buildCommand: npm install && npm run build
     publishPath: frontend/dist
     envVars:
