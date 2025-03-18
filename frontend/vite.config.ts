@@ -7,12 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/': {
-        target: 'http://127.0.0.1:5000', // Adresse de votre backend Flask
-        changeOrigin: true,
-        secure: false,
-      },
-      '/history': {
-        target: 'http://127.0.0.1:5000/history', // Adresse de votre backend Flask
+        target: process.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000',
         changeOrigin: true,
         secure: false,
       },
