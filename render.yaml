@@ -1,24 +1,15 @@
+# filepath: /home/student/Parleo-TTS/render.yaml
 services:
   - name: paleo-tts-backend
     type: web
-    env: python
-    buildCommand: ""
-    startCommand: gunicorn app:app
-    envVars:
-      - key: FLASK_ENV
-        value: production
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
     plan: free
     region: oregon
-    build:
-      path: backend
-    runtime: python3
-    pythonVersion: "3.9"
 
   - name: paleo-tts-frontend
     type: web
-    runtime: static  # ✅ Ajout du runtime pour un site statique
-    buildCommand: npm install && npm run build
-    publishPath: frontend/dist
-    envVars:
-      - key: VITE_BACKEND_URL
-        value: https://paleo-backend.render.com
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    plan: free
+    region: oregon
