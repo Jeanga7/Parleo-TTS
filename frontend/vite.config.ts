@@ -6,14 +6,19 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/': {
-        target: process.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000',
+      "/api": {
+        target: "http://backend:5000", // Adresse du backend dans Docker
+        changeOrigin: true,
+        secure: false,
+      },
+      "/history": {
+        target: "http://backend:5000", // Adresse du backend dans Docker
         changeOrigin: true,
         secure: false,
       },
     },
   },
   optimizeDeps: {
-    exclude: ['lucide-react'],
+    exclude: ["lucide-react"],
   },
 });

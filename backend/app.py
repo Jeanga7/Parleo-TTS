@@ -33,43 +33,40 @@ def cleanup_old_files():
             if file_age > 600:  # 600 secondes = 10 minutes
                 os.remove(filepath)
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/api", methods=["POST"])
+def generate_audio():
     cleanup_old_files()
+    print(f"Requête POST reçue avec les données : {request.form}")
 
-    if request.method == "POST":
-        try:
-            text = request.form.get("text")
-            voice = request.form.get("voice", "fr")
-            speed = float(request.form.get("speed", 1))
+    try:
+        text = request.form.get("text")
+        voice = request.form.get("voice", "fr")
+        speed = float(request.form.get("speed", 1))
 
-            if not text or not text.strip():
-                return jsonify({"error": "Veuillez entrer un texte valide."}), 400
+        if not text or not text.strip():
+            return jsonify({"error": "Veuillez entrer un texte valide."}), 400
 
-            filename = f"{uuid.uuid4()}.mp3"
-            filepath = os.path.join(AUDIO_FOLDER, filename)
+        filename = f"{uuid.uuid4()}.mp3"
+        filepath = os.path.join(AUDIO_FOLDER, filename)
 
-            tts = gTTS(text=text, lang=voice, slow=(speed < 1))
-            tts.save(filepath)
-            
-            # Enregistrer dans l'historique avec la date de génération
-            generated_time = datetime.datetime.now().isoformat()
-            history_item = {
-                "text": text,
-                "audio_url": f"http://127.0.0.1:5000/audio/{filename}",  # URL pour l'écoute en ligne
-                "download_url": f"http://127.0.0.1:5000/download/{filename}",  # URL pour le téléchargement
-                "time": generated_time
-            }
-            history.append(history_item)
+        tts = gTTS(text=text, lang=voice, slow=(speed < 1))
+        tts.save(filepath)
 
-            return jsonify(history_item)
+        # Enregistrer dans l'historique avec la date de génération
+        generated_time = datetime.datetime.now().isoformat()
+        history_item = {
+            "text": text,
+            "audio_url": f"/audio/{filename}",
+            "download_url": f"/download/{filename}",
+            "time": generated_time,
+        }
+        history.append(history_item)
 
-        except Exception as e:
-            # Log de l'erreur
-            print(f"Erreur lors de la génération audio : {e}")
-            return jsonify({"error": "Une erreur est survenue lors de la génération audio"}), 500
+        return jsonify(history_item)
 
-    return send_from_directory(app.static_folder, "index.html")
+    except Exception as e:
+        print(f"Erreur lors de la génération audio : {e}")
+        return jsonify({"error": "Une erreur est survenue lors de la génération audio"}), 500
 
 @app.route("/download/<filename>")
 def download_file(filename):

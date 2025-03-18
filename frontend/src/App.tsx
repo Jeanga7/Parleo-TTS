@@ -44,10 +44,16 @@ function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/", {
+      const formData = new URLSearchParams();
+      formData.append("text", text);
+      formData.append("voice", voice);
+      formData.append("speed", speed);
+
+      const response = await fetch("/api", {
+        // Utilisez "/api" pour éviter les conflits avec les fichiers statiques
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ text, voice, speed }),
+        body: formData.toString(),
       });
 
       const data = await response.json();
