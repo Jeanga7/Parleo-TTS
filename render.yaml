@@ -15,9 +15,14 @@ services:
     pythonVersion: "3.9"
 
   - name: paleo-tts-frontend
-    type: web
+    type: web  # Utilisation de "web" au lieu de "static"
+    env: node
     buildCommand: npm install && npm run build
-    publishPath: frontend/dist
+    startCommand: npm run preview  # Utilisation de "vite preview" pour servir le frontend
     envVars:
       - key: VITE_BACKEND_URL
-        value: https://paleo-backend.render.com
+        value: https://paleo-backend.onrender.com
+    plan: free
+    region: oregon
+    build:
+      path: frontend
